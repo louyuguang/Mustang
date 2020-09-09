@@ -1,4 +1,5 @@
-
-.idea/.*
+.idea
 go_build_Mustang_darwin
 Mustang
+Mustang
+go_build_Mustang_darwin
