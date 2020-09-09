@@ -1,0 +1,14 @@
+<script type="text/javascript">
+
+    $(function(){
+        path = document.location.pathname.split("/")
+        if (path[1] != "") {
+            $("#" + path[1]).addClass("active")
+            if ($('#' + path[1] + " ." + path[2]).length > 0) {
+                $('#' + path[1] + " ." + path[2]).addClass("active")
+            } else if ($('#' + path[1] + " ." + path[2] + "_" + path[3]).length > 0) {
+                $('#' + path[1] + " ." + path[2] + "_" + path[3]).addClass("active")
+            }
+        }
+    });
+</script>

@@ -1,0 +1,64 @@
+<ul class="sidebar-menu">
+    <li class="header text-center">MAIN NAVIGATION</li>
+{{/*    {% if g.user.role in [UserRole.admin, UserRole.sa,UserRole.dba] %}*/}}
+    <!-- 用户管理 -->
+    <li class="treeview" id="account">
+        <a href="#"><i class="fa fa-users"></i> <span>用户管理</span> <i class="fa fa-angle-left pull-right"></i></a>
+        <ul class="treeview-menu">
+            <li class="list">
+                <a href="{{urlfor "UserController.List"}}"> <i class="fa fa-circle-o"></i> 用户列表</a>
+            </li>
+            <li class="audit">
+                <a href=""> <i class="fa fa-circle-o"></i> 操作记录</a>
+            </li>
+        </ul>
+    </li>
+    <li class="treeview" id="k8s_info">
+        <a href="#"><i class="fa fa-users"></i> <span>k8s集群配置信息</span> <i class="fa fa-angle-left pull-right"></i></a>
+        <ul class="treeview-menu">
+            <li class="list">
+                <a href=""> <i class="fa fa-circle-o"></i> 集群信息列表</a>
+            </li>
+            <li class="env_list">
+                <a href=""> <i class="fa fa-circle-o"></i> 环境与集群关系设置</a>
+            </li>
+        </ul>
+    </li>
+{{/*    {% endif %}*/}}
+
+    <!-- 项目管理 -->
+    <li class="treeview" id="project">
+        <a href="#"><i class="fa fa-book"></i> <span>项目管理</span> <i class="fa fa-angle-left pull-right"></i></a>
+        <ul class="treeview-menu">
+            <li class="list">
+                <a href=""> <i class="fa fa-circle-o"></i> 项目列表</a>
+            </li>
+            <li class="config_list">
+                <a href=""> <i class="fa fa-circle-o"></i> k8s配置列表</a>
+            </li>
+        </ul>
+    </li>
+
+    <!-- 配置管理 -->
+    <li class="treeview" id="configmap">
+        <a href="#"><i class="fa fa-book"></i> <span>配置管理</span> <i class="fa fa-angle-left pull-right"></i></a>
+        <ul class="treeview-menu">
+            <li class="list">
+                <a href=""> <i class="fa fa-circle-o"></i> configmap配置</a>
+            </li>
+        </ul>
+    </li>
+
+    <!-- 部署管理 -->
+    <li class="treeview" id="deploy">
+        <a href="#"><i class="fa  fa-cloud-upload"></i> <span>部署管理</span> <i class="fa fa-angle-left pull-right"></i></a>
+        <ul class="treeview-menu">
+            <li class="add">
+                <a href=""> <i class="fa fa-circle-o"></i> 新建部署</a>
+            </li>
+            <li class="list">
+                <a href=""> <i class="fa fa-circle-o"></i> 部署列表</a>
+            </li>
+        </ul>
+    </li>
+</ul>

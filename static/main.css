@@ -1,0 +1,30 @@
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+body {
+    font-family: "Hiragino Sans GB", Helvetica, Arial, sans-serif;
+}
+.form-group label{
+    font-weight: normal!important;
+}
+/**hack select2 start**/
+.select2-container--open{
+	z-index: 10001!important;
+}
+.select2-container--bootstrap .select2-results__option[aria-selected=true] {
+  background-color: #d9edf7;
+  color: #262626;
+}
+/**hack select2 end**/
+/**hack jobx start**/
+.jBox-Confirm-footer{
+	border-top:1px solid #EAEAEA;
+	colr:red;
+	padding: 6px 0;
+}
+/**hack jobx end **/
+.fa {
+    margin-left:10px
+}

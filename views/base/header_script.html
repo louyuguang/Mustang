@@ -1,0 +1,241 @@
+<script type="text/javascript" src="/static/plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script type="text/javascript" src="/static/plugins/jQueryForm/jquery.form.min.js"></script>
+<script type="text/javascript" src="/static/plugins/jQueryUI/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/static/plugins/tabledit/jquery.tabledit.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/plugins/select2/select2.full.min.js"></script>
+<script type="text/javascript" src="/static/plugins/iCheck/icheck.min.js"></script>
+<script type="text/javascript" src="/static/plugins/bootstrap-sco/js/sco.modal.js"></script>
+<script type="text/javascript" src="/static/plugins/bootstrap-sco/js/sco.confirm.js"></script>
+<script type="text/javascript" src="/static/plugins/bootstrap-sco/js/sco.message.js"></script>
+<script type="text/javascript" src="/static/plugins/jBox/jBox.min.js"></script>
+<script type="text/javascript" src="/static/plugins/jquery.validator/jquery.validator.js"></script>
+<script type="text/javascript" src="/static/dist/js/module/common/ui.common.js"></script>
+<script type="text/javascript" src="/static/dist/js/module/common/status_tips.js"></script>
+<script type="text/javascript" src="/static/plugins/morris/raphael-min.js"></script>
+<script type="text/javascript" src="/static/plugins/morris/morris.min.js"></script>
+<script type="text/javascript" src="/static/dist/js/module/common/pms_ex.js"></script>
+<script type="text/javascript" src="/static/plugins/datepicker/bootstrap-datepicker.js"></script>
+<script type="text/javascript" src="/static/plugins/code-prettify/prettify.js"></script>
+<script type="text/javascript" src="/static/plugins/code-prettify/lang-sql.js"></script>
+<script type="text/javascript" src="/static/dist/js/app.min.js"></script>
+<script src="/static/plugins/codemirror/lib/codemirror.js"></script>
+<script src="/static/plugins/codemirror/mode/javascript/javascript.js"></script>
+<script src="/static/plugins/codemirror/addon/selection/active-line.js"></script>
+<script src="/static/plugins/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="/static/plugins/codemirror/addon/edit/closebrackets.js"></script>
+<script src="/static/plugins/codemirror/addon/display/placeholder.js"></script>
+<script src="/static/plugins/codemirror/ui-choose/ui-choose.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
+<script src="/static/plugins/codemirror/mode/xml/xml.js"></script>
+<script src="/static/plugins/codemirror/mode/css/css.js"></script>
+<script src="/static/plugins/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="/static/plugins/codemirror/addon/merge/merge.js"></script>
+
+<script>
+
+    function getReferrer(url) {
+        ref = document.referrer
+        return ref ? ref : url
+    }
+
+    function inArray(str, arrs) {
+        for (var i = 0; i < arrs.length; i++) {
+            if (arrs[i] == str) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return "/";
+    }
+    function getContent(url, tab, obj, success_call){
+        var tab = $(tab);
+        function fetchContent(fetch_url) {
+            Net.get({
+                url: fetch_url,
+                dataType: "html",
+                beforeSend: function(){
+                    obj.html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i></p>')
+                },
+                success: function(content){
+                    obj.html(content);
+                    obj.find('.page').on('click', function () {
+                        if ($(this).attr('href') != '#') {
+                            fetchContent($(this).prop('href'));
+                        }
+                        return false;
+                    })
+                    tab.attr('status', '1');
+                    success_call()
+                }
+            })
+        }
+        if (tab.attr("status") == 0){
+            fetchContent(url)
+        }
+        if (tab.attr("status") == 2){
+            fetchContent($($('.tab-pane.active .paginate_button.active .page')[0]).prop('href'))
+        }
+    }
+
+    function ajax_request_append(url, select, icon, selectable, callback=Function.prototype) {
+        Net.get({
+            url: url,
+            beforeSend: function() {
+                select.prop("disabled", true)
+                select.empty()
+                if (icon) {
+                    icon.addClass("fa fa-spinner fa-spin")
+                }
+            },
+            success: function(resp) {
+                switch (resp.status) {
+                    case 0:
+                        select.append("<option></option>")
+                        if (selectable == "__latest__") {
+                            selectable = resp.data[0].id
+                        }
+                        var branchs_list = []
+                        resp.data.forEach(_ => {
+                            branchs_list.push(_.id)
+                        })
+                        if (inArray(selectable, branchs_list)) {
+                            resp.data.forEach(_ => {
+                                if (_.id == selectable) {
+                                    select.append($('<option/>').val(_.id).text(_.text).prop("selected", true))
+                                } else {
+                                    select.append($('<option/>').val(_.id).text(_.text))
+                                }
+                            })
+                        } else {
+                            resp.data.forEach(_ => {
+                                if (_.id == 'master') {
+                                    select.append($('<option/>').val(_.id).text(_.text).prop("selected", true))
+                                } else {
+                                    select.append($('<option/>').val(_.id).text(_.text))
+                                }
+                            })
+                        }
+
+                        select.select2({
+                            placeholder: select.attr('data-placeholder')
+                        })
+                        select.prop("disabled", false)
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        //callback()
+                        !!callback && callback()
+                        break
+                    case 1:
+                        ui.msg.warning(resp.msg)
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        break;
+                    case -1:
+                        ui.msg.error(resp.msg)
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        break;
+                    default:
+                        ui.msg.warning("获取数据失败!")
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        break
+                }
+            },
+            error: function() {
+                ui.msg.error("获取数据失败!")
+                if (icon) {
+                    icon.removeClass("fa fa-spinner fa-spin")
+                }
+            }
+        })
+    }
+
+    function ajax_request_append_for_multi_deploy(url, select, icon, selectable, callback=Function.prototype) {
+        Net.get({
+            url: url,
+            beforeSend: function() {
+                select.prop("disabled", true)
+                select.empty()
+                if (icon) {
+                    icon.addClass("fa fa-spinner fa-spin")
+                }
+            },
+            success: function(resp) {
+                switch (resp.status) {
+                    case 0:
+                        if (selectable == "__latest__") {
+                            selectable = resp.data[0].id
+                        }
+                        var branchs_list = []
+                        resp.data.forEach(_ => {
+                            branchs_list.push(_.id)
+                        })
+                        if (inArray(selectable, branchs_list)) {
+                            resp.data.forEach(_ => {
+                                if (_.id == selectable) {
+                                    select.append($('<option/>').val(_.id).text(_.text).prop("selected", true))
+                                } else {
+                                    select.append($('<option/>').val(_.id).text(_.text))
+                                }
+                            })
+                        } else {
+                            resp.data.forEach(_ => {
+                                if (_.id == 'master') {
+                                    select.append($('<option/>').val(_.id).text(_.text).prop("selected", true))
+                                } else {
+                                    select.append($('<option/>').val(_.id).text(_.text))
+                                }
+                            })
+                        }
+
+                        select.select2({
+                            placeholder: select.attr('data-placeholder')
+                        })
+                        select.prop("disabled", false)
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        //callback()
+                        !!callback && callback()
+                        break
+                    case 1:
+                        ui.msg.warning(resp.msg)
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        break;
+                    case -1:
+                        ui.msg.error(resp.msg)
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        break;
+                    default:
+                        ui.msg.warning("获取数据失败!")
+                        if (icon) {
+                            icon.removeClass("fa fa-spinner fa-spin")
+                        }
+                        break
+                }
+            },
+            error: function() {
+                ui.msg.error("获取数据失败!")
+                if (icon) {
+                    icon.removeClass("fa fa-spinner fa-spin")
+                }
+            }
+        })
+    }
+
+</script>

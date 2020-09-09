@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title> {{ .header_title }}Mustang | Starter</title>
+    <link rel="icon" href="/static/img/favicon.ico">
+    <!-- Tell the browser to be responsive to screen width -->
+    <!--<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    {{template "base/link_css.html" .}}
+    {{template "base/header_script.html" .}}
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+    {{template "base/main_header.html" .}}
+    <aside class="main-sidebar">
+        <section class="sidebar">
+            {{template "base/user_panel.html" .}}
+            {{template "base/sidbar_menu.html" .}}
+        </section>
+    </aside>
+
+    <div class="content-wrapper">
+        {{template "base/content_header.html" .}}
+        <section class="content">
+            {{template "content" .}}
+        </section>
+    </div>
+    {{template "base/main_footer.html" .}}
+</div>
+{{template "base/footer_script.html" .}}
+{{template "self_footer_script" .}}
+</body>
+</html>

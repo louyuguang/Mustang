@@ -1,0 +1,11 @@
+<section class="content-header">
+    <ol class="breadcrumb" style="position: static; padding-top:0;padding-bottom:0;float: none;">
+        <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+        {{if .LevelOne}}
+        <li><a href="#"> 路径1 </a></li>
+        {{end}}
+        {{if .LevelTwo}}
+        <li><a href="#" class="active"> 路径2 </a></li>
+        {{end}}
+    </ol>
+</section>
