@@ -22,12 +22,29 @@ type User struct {
 
 type userModel struct{}
 
-func (*userModel) GetAllUsers() ([]*User, error) {
-	var users []*User
-	_, err := Ormer().QueryTable(new(User)).RelatedSel().All(&users)
-	if err != nil {
-		return nil, err
+func (*userModel) GetAllNum(scontent ...string) (num int64, err error) {
+	query := map[string]interface{}{}
+	if scontent != nil {
+		query["username__icontains"] = scontent
 	}
+	qs := Ormer().QueryTable(new(User))
+	qs = BuildFilter(qs, query)
+	num, err = qs.Count()
+	if err != nil {
+		return -1, err
+	}
+	return num, nil
+}
+
+func (*userModel) GetUsers(pers int, offset int, scontent ...string) ([]*User, error) {
+	var users []*User
+	query := map[string]interface{}{}
+	qs := Ormer().QueryTable(new(User))
+	if scontent != nil {
+		query["username__icontains"] = scontent
+	}
+	qs = BuildFilter(qs, query)
+	qs.Limit(pers, offset).RelatedSel().All(&users)
 	return users, nil
 }
 
@@ -36,7 +53,11 @@ func (*userModel) GetUserById(id int64) (v *User, err error) {
 	if err = Ormer().Read(v); err != nil {
 		return nil, err
 	}
-	return v, nil
+	_, err = Ormer().LoadRelated(v, "Role")
+	if err == nil {
+		return v, nil
+	}
+	return nil, err
 }
 
 func (*userModel) GetUserByName(username string) (v *User, err error) {
@@ -44,8 +65,11 @@ func (*userModel) GetUserByName(username string) (v *User, err error) {
 	if err = Ormer().Read(v, "username"); err != nil {
 		return nil, err
 	}
-	Ormer().LoadRelated(v, "Role")
-	return v, nil
+	_, err = Ormer().LoadRelated(v, "Role")
+	if err == nil {
+		return v, nil
+	}
+	return nil, err
 }
 
 func (*userModel) EnsureUser(m *User) (*User, error) {

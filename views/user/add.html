@@ -10,13 +10,6 @@
             <input type="hidden" id="permissions" name="permissions"/>
             <div class="box-body">
                 <div class="form-group">
-                    <label for="inputUsername" class="col-sm-2 control-label">id<span class="text-red">*</span></label>
-                    <div class="col-sm-8">
-                        <input type="text" name="id" value="{{ .UserAdd.Id }}" class="form-control"
-                               id="id" placeholder="id" readonly="readonly">
-                    </div>
-                </div>
-                <div class="form-group">
                     <label for="inputUsername" class="col-sm-2 control-label">用户名<span class="text-red">*</span></label>
                     <div class="col-sm-8">
                         <input type="text" name="username" value="{{ .UserAdd.UserName }}" class="form-control"
@@ -44,35 +37,31 @@
                                id="email" placeholder="email">
                     </div>
                 </div>
-{{/*                <div class="form-group">*/}}
-{{/*                    <label class="col-sm-2 control-label">角色<span class="text-red">*</span></label>*/}}
-{{/*                    <div class="col-sm-8"><input type="email" name="email" value="{{ .User.Role }}"*/}}
-{{/*                                                 class="form-control" id="email" placeholder="email"*/}}
-{{/*                                                 readonly="readonly"></div>*/}}
-{{/*                    <div class="col-sm-8">*/}}
-{{/*                        <select id="roleSelect" name="role" data-placeholder="--请选择角色--" class="js-states form-control">*/}}
-{{/*                            <option></option>*/}}
-{{/*                            {{range .User.Role}}*/}}
-{{/*                            <option value="{{ id }}" {% if user.role== id %} selected {% endif %}> {{ desc }} </option>*/}}
-{{/*                            {% endfor %}*/}}
-{{/*                        </select>*/}}
-{{/*                    </div>*/}}
-{{/*                </div>*/}}
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">角色<span class="text-red">*</span></label>
+                    <div class="col-sm-8">
+                        <select id="roleSelect" name="role" data-placeholder="--请选择角色--" class="js-states form-control">
+                            <option></option>
+                            {{range .Roles}}
+                                <option value="{{ .Id }}" {{if eq $.UserAdd.Role.Id .Id}} selected {{end}}> {{ .Rolename }} </option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
 
-{{/*                <div class="form-group">*/}}
-{{/*                    <label class="col-sm-2 control-label">是否启用</label>*/}}
-{{/*                    <div class="col-sm-8">*/}}
-{{/*                        <div class="radio i-checks">*/}}
-{{/*                            <label><input type="radio" value="1" name="is_active"*/}}
-{{/*                                          {% if user.active %} checked="" {% endif %}*/}}
-{{/*                                >启用</label>*/}}
-{{/*                            <label><input type="radio" value="0" name="is_active"*/}}
-{{/*                                          {% if not user.active %} checked="" {% endif %}*/}}
-{{/*                                >禁用</label>*/}}
-{{/*                        </div>*/}}
-{{/*                    </div>*/}}
-{{/*                </div>*/}}
-
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">是否启用</label>
+                    <div class="col-sm-8">
+                        <div class="radio i-checks">
+                            <label><input type="radio" value="1" name="is_active"
+                                          {{if .UserAdd.Active}}checked{{end}}
+                                >启用</label>
+                            <label><input type="radio" value="0" name="is_active"
+                                          {{if not .UserAdd.Active}}checked{{end}}
+                                >禁用</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- /.box-body -->
@@ -85,4 +74,9 @@
     </div>
 {{end}}
 {{define "self_footer_script"}}
+    <script>
+        $(function () {
+            $('#roleSelect').select2()
+        })
+    </script>
 {{end}}

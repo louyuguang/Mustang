@@ -2,15 +2,16 @@ package controllers
 
 import (
 	"Mustang/models"
-	"github.com/astaxie/beego"
+	"Mustang/utils/paginator"
+	"fmt"
 	"net/http"
+	"strconv"
+	//"github.com/astaxie/beego"
 )
 
 type BaseController struct {
-	beego.Controller
+	ResultHandlerController
 	User *models.User
-	//IsAdmin bool
-	//o orm.Ormer
 }
 
 func (c *BaseController) Prepare() {
@@ -32,7 +33,32 @@ func (c *BaseController) Prepare() {
 	c.Data["User"] = user
 }
 
+func (c *BaseController) GetIDFromURL() int64 {
+	return c.GetIntParamFromURL("id")
+}
+
+func (c *BaseController) GetIntParamFromURL(param string) int64 {
+	paramStr := c.Input().Get(param)
+	//if len(paramStr) == 0 {
+	//	c.AbortBadRequest(fmt.Sprintf("Invalid %s in URL", param))
+	//}
+	if paramStr != "" {
+		paramInt, err := strconv.ParseInt(paramStr, 10, 64)
+		if err != nil || paramInt < 0 {
+			c.AbortBadRequest(fmt.Sprintf("Invalid %s in URL", param))
+		}
+		return paramInt
+	}
+	return 0
+}
+
 // @router / [get]
 func (c *BaseController) Index() {
 	c.TplName = "index.html"
+}
+
+func (c *BaseController) SetPaginator(pers int, cnt int64) *paginator.Paginator {
+	p := paginator.NewPaginator(c.Ctx.Request, pers, cnt)
+	c.Data["paginator"] = p
+	return p
 }

@@ -1,7 +1,6 @@
 package db
 
 import (
-	//"Mustang/controllers/auth"
 	"Mustang/models"
 	"Mustang/utils/encode"
 	"fmt"
