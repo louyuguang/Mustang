@@ -1,7 +1,9 @@
 package hack
 
 import (
+	"encoding/json"
 	"reflect"
+	"strings"
 	"unsafe"
 )
 
@@ -27,4 +29,23 @@ func Slice(s string) (b []byte) {
 	pbytes.Len = pstring.Len
 	pbytes.Cap = pstring.Len
 	return
+}
+
+//格式例子："username=abc&password=abc"，如不符合key=value的参数会被抛弃, 重复的key以最后一个出现为准
+func FormToJson(form []byte) ([]byte, error) {
+	paramMap := map[string]interface{}{}
+	params := strings.Split(string(form), "&")
+	for _, param := range params {
+		paramKeyVal := strings.Split(param, "=")
+		if len(paramKeyVal) != 2 {
+			continue
+		}
+		paramMap[paramKeyVal[0]] = paramKeyVal[1]
+	}
+	paramJson, err := json.Marshal(paramMap)
+	if err != nil {
+		return nil, err
+	}
+	paramByte := []byte(string(paramJson))
+	return paramByte, nil
 }

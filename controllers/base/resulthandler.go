@@ -1,4 +1,4 @@
-package controllers
+package base
 
 import (
 	"Mustang/utils/hack"
@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
+	"github.com/go-sql-driver/mysql"
 	"net/http"
 )
 
@@ -27,14 +29,59 @@ type ResultHandlerController struct {
 	beego.Controller
 }
 
-type Result struct {
-	Data interface{} `json:"data"`
+type errorInterface interface {
+	Error()
 }
+
 
 func (c *ResultHandlerController) Success(data interface{}) {
 	c.Ctx.Output.SetStatus(http.StatusOK)
-	c.Data["json"] = Result{Data: data}
+	c.Data["json"] = map[string]interface{}{"status": 0, "msg": data}
 	c.ServeJSON()
+}
+
+func (c *ResultHandlerController) Fail(data interface{}) {
+	errorResult := &ErrorResult{}
+	switch e := data.(type) {
+	case *mysql.MySQLError:
+		errorResult.Code = http.StatusBadRequest
+		errorResult.SubCode = -1
+		if e.Number == 1062 {
+			errorResult.Msg = "Resources already exist! "
+		} else {
+			errorResult.Msg = e.Message
+		}
+	case string:
+		errorResult.Code = http.StatusOK
+		errorResult.SubCode = 1
+		errorResult.Msg = e
+	case error:
+		if data == orm.ErrNoRows {
+			errorResult.Code = http.StatusNotFound
+		}
+		errorResult.SubCode = -1
+		errorResult.Msg = e.Error()
+	default:
+		errorResult.Code = http.StatusInternalServerError
+		errorResult.SubCode = -1
+		errorResult.Msg = "Internal server error."
+	}
+	c.Ctx.Output.SetStatus(errorResult.Code)
+	c.Data["json"] = map[string]interface{}{"status": errorResult.SubCode, "msg": errorResult.Msg}
+	c.ServeJSON()
+}
+
+func (c *ResultHandlerController) errorResult(code int, msg string) []byte {
+	errorResult := ErrorResult{
+		Code: code,
+		Msg:  msg,
+	}
+	body, err := json.Marshal(errorResult)
+	if err != nil {
+		logs.Error("Json Marshal error. %v", err)
+		c.CustomAbort(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+	}
+	return body
 }
 
 // Abort stops controller handler and show the error data， e.g. Prepare
@@ -62,17 +109,4 @@ func (c *ResultHandlerController) AbortBadRequestFormat(paramName string) {
 func (c *ResultHandlerController) AbortUnauthorized(msg string) {
 	logs.Info("Abort Unauthorized error. %s", msg)
 	c.CustomAbort(http.StatusUnauthorized, hack.String(c.errorResult(http.StatusUnauthorized, msg)))
-}
-
-func (c *ResultHandlerController) errorResult(code int, msg string) []byte {
-	errorResult := ErrorResult{
-		Code: code,
-		Msg:  msg,
-	}
-	body, err := json.Marshal(errorResult)
-	if err != nil {
-		logs.Error("Json Marshal error. %v", err)
-		c.CustomAbort(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-	}
-	return body
 }

@@ -14,3 +14,11 @@ func (*roleModel) GetAllRoles() ([]*Role, error) {
 	Ormer().QueryTable(new(Role)).RelatedSel().All(&roles)
 	return roles, nil
 }
+
+func (*roleModel) GetRole(user *userModel, id int) (*Role, error) {
+	role := &Role{Id: id}
+	if err := Ormer().Read(&role); err != nil{
+		return nil, err
+	}
+	return role, nil
+}

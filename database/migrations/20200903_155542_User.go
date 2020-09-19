@@ -19,11 +19,11 @@ func init() {
 
 // Run the migrations
 func (m *User_20200903_155542) Up() {
-	m.SQL("alter table user add created datetime default now() null;")
-	m.SQL("alter table user add role bool default false null;")
-	m.SQL("alter table user modify created datetime default CURRENT_TIMESTAMP not null;")
-	m.SQL("alter table user modify role int default 5 not null;")
-	m.SQL("alter table user add active bool default true not null;")
+	m.SQL("alter table usercontroller add created datetime default now() null;")
+	m.SQL("alter table usercontroller add role bool default false null;")
+	m.SQL("alter table usercontroller modify created datetime default CURRENT_TIMESTAMP not null;")
+	m.SQL("alter table usercontroller modify role int default 5 not null;")
+	m.SQL("alter table usercontroller add active bool default true not null;")
 }
 
 // Reverse the migrations

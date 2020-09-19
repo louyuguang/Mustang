@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"sync"
 )
@@ -27,13 +26,4 @@ func Ormer() orm.Ormer {
 		globalOrm = orm.NewOrm()
 	})
 	return globalOrm
-}
-
-func CountObjects(qs orm.QuerySeter) (int64, error) {
-	cnt, err := qs.Count()
-	if err != nil {
-		beego.Error("models.CountObjects ", err)
-		return 0, err
-	}
-	return cnt, err
 }

@@ -74,7 +74,7 @@
 {{define "self_footer_script"}}
     <script>
         function user_edit(user_id) {
-            document.location.href = "{{urlfor "UserController.Add"}}" + '?id=' + user_id
+            document.location.href = "{{urlfor "UserController.Add"}}" + '/' + user_id
         }
 
         function user_delete(user_id) {

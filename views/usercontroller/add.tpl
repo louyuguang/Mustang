@@ -7,12 +7,11 @@
         <!-- /.box-header -->
         <!-- form start -->
         <form class="form-horizontal" id="userForm" action="" method="post">
-            <input type="hidden" id="permissions" name="permissions"/>
             <div class="box-body">
                 <div class="form-group">
                     <label for="inputUsername" class="col-sm-2 control-label">用户名<span class="text-red">*</span></label>
                     <div class="col-sm-8">
-                        <input type="text" name="username" value="{{ .UserAdd.UserName }}" class="form-control"
+                        <input type="text" name="username" value="" class="form-control"
                                id="username" placeholder="username">
                     </div>
                 </div>
@@ -26,14 +25,14 @@
                 <div class="form-group">
                     <label for="inputname" class="col-sm-2 control-label">姓名<span class="text-red">*</span></label>
                     <div class="col-sm-8">
-                        <input type="text" name="realname" value="{{ .UserAdd.RealName }}" class="form-control"
+                        <input type="text" name="realname" value="" class="form-control"
                                id="name" placeholder="realname">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">邮箱<span class="text-red">*</span></label>
                     <div class="col-sm-8">
-                        <input type="email" name="email" value="{{ .UserAdd.Email }}" class="form-control"
+                        <input type="email" name="email" value="" class="form-control"
                                id="email" placeholder="email">
                     </div>
                 </div>
@@ -43,7 +42,7 @@
                         <select id="roleSelect" name="role" data-placeholder="--请选择角色--" class="js-states form-control">
                             <option></option>
                             {{range .Roles}}
-                                <option value="{{ .Id }}" {{if eq $.UserAdd.Role.Id .Id}} selected {{end}}> {{ .Rolename }} </option>
+                                <option value={{ .Id }}> {{ .Rolename }} </option>
                             {{end}}
                         </select>
                     </div>
@@ -53,12 +52,8 @@
                     <label class="col-sm-2 control-label">是否启用</label>
                     <div class="col-sm-8">
                         <div class="radio i-checks">
-                            <label><input type="radio" value="1" name="is_active"
-                                          {{if .UserAdd.Active}}checked{{end}}
-                                >启用</label>
-                            <label><input type="radio" value="0" name="is_active"
-                                          {{if not .UserAdd.Active}}checked{{end}}
-                                >禁用</label>
+                            <label><input type="radio" value=1 name="active" checked>启用</label>
+                            <label><input type="radio" value=0 name="active">禁用</label>
                         </div>
                     </div>
                 </div>
@@ -77,6 +72,18 @@
     <script>
         $(function () {
             $('#roleSelect').select2()
+            $('#userAddBtn').on('click', function (e) {
+                var form = $('#userForm').serializeJSON()
+                form['role'] = {'id': parseInt(form['role'])}
+                form['is_active'] = Boolean(form['active'])
+                Net.post({
+                    url: {{urlfor "UserController.Add"}},
+                    data: JSON.stringify(form),
+                    btn: $('#userAddBtn'),
+                    icon: $('#iconWait'),
+                    go: getReferrer("{{urlfor "UserController.List"}}")
+                });
+            })
         })
     </script>
 {{end}}

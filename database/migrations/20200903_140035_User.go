@@ -19,12 +19,12 @@ func init() {
 
 // Run the migrations
 func (m *User_20200903_140035) Up() {
-	m.SQL("CREATE TABLE IF NOT EXISTS `user` (`id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,`username` varchar(255) NOT NULL DEFAULT '' ,`password` varchar(255) NOT NULL DEFAULT '' ,`email` varchar(255) NOT NULL DEFAULT '') ENGINE=InnoDB")
+	m.SQL("CREATE TABLE IF NOT EXISTS `usercontroller` (`id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,`username` varchar(255) NOT NULL DEFAULT '' ,`password` varchar(255) NOT NULL DEFAULT '' ,`email` varchar(255) NOT NULL DEFAULT '') ENGINE=InnoDB")
 
 }
 
 // Reverse the migrations
 func (m *User_20200903_140035) Down() {
-	m.SQL("DROP TABLE user")
+	m.SQL("DROP TABLE usercontroller")
 
 }

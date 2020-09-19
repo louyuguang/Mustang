@@ -9,16 +9,7 @@ import (
 
 type DBAuth struct{}
 
-//func init() {
-//	auth.Register(models.AuthTypeDB, &DBAuth{})
-//}
-var GlobalUserSalt  = beego.AppConfig.String("GlobalUserSalt")
-
-
-type CurrentInfo struct {
-	User   *models.User      `json:"user"`
-	Config map[string]string `json:"config"`
-}
+var GlobalUserSalt = beego.AppConfig.String("GlobalUserSalt")
 
 func (*DBAuth) Authenticate(m models.AuthModel) (*models.User, error) {
 	username := m.UserName

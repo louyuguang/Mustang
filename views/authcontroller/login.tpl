@@ -45,7 +45,7 @@
         $('#loginForm').on('submit', function (e) {
             Net.post({
                 url: "/login",
-                data: JSON.stringify($('#loginForm').serializeObject()),
+                data: JSON.stringify($('#loginForm').serializeJSON()),
                 btn: $('#btnLogin'),
                 icon: $('#iconWait'),
                 success: function (resp) {
@@ -69,21 +69,6 @@
             })
             return false
         })
-        $.fn.serializeObject = function () {
-            var o = {};
-            var a = this.serializeArray();
-            $.each(a, function () {
-                if (o[this.name]) {
-                    if (!o[this.name].push) {
-                        o[this.name] = [o[this.name]];
-                    }
-                    o[this.name].push(this.value || '');
-                } else {
-                    o[this.name] = this.value || '';
-                }
-            });
-            return o;
-        }
     })
 </script>
 </body>

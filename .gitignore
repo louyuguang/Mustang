@@ -1,3 +1,7 @@
 .idea
 Mustang
 go_build_Mustang_darwin
+.DS_Store
+vendor
+go_build_Mustang
+lastupdate.tmp

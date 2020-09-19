@@ -21,9 +21,9 @@ func init() {
 func (m *Role_20200907_144614) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
 	m.SQL("create table role ( id int null, role varchar(255) null )");
-	m.SQL("alter table user change role role_id int default 5 not null;");
-	m.SQL("alter table user add constraint user___fk_1 foreign key (role_id) references role (id);");
-	m.SQL("alter table user alter column role_id set default 3;");
+	m.SQL("alter table usercontroller change role role_id int default 5 not null;");
+	m.SQL("alter table usercontroller add constraint user___fk_1 foreign key (role_id) references role (id);");
+	m.SQL("alter table usercontroller alter column role_id set default 3;");
 }
 
 // Reverse the migrations

@@ -1,26 +1,26 @@
 package models
 
 import (
+	"Mustang/utils/encode"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"time"
 )
 
 type User struct {
-	Id       int64       `orm:"pk;auto" json:"id,omitempty"`
-	Role     *Role     `orm:"rel(fk);default(3);column(role_id)"`
-	UserName string    `orm:"index;unique;size(200);column(username)" json:"name,omitempty"`
-	Password string    `orm:"size(255)" json:"-"`
-	RealName string    `orm:"size(255)"`
-	Email    string    `orm:"size(200)" json:"email,omitempty"`
-	Active   bool      `orm:"default(true)"`
-	Created  time.Time `orm:"auto_now_add;type(datetime)" json:"createTime,omitempty"`
+	Id       int64      `orm:"pk;auto" json:"id,omitempty"`
+	Role     *Role      `orm:"rel(fk);default(4);column(role_id)" json:"role"`
+	UserName string     `orm:"index;unique;size(200);column(username)" json:"username,omitempty"`
+	Password string     `orm:"size(255)" json:"password"`
+	RealName string     `orm:"size(255)" json:"realname"`
+	Email    string     `orm:"size(200)" json:"email,omitempty"`
+	Active   bool       `orm:"default(true)" json:"is_active"`
+	Created  *time.Time `orm:"auto_now_add;type(datetime)" json:"createTime,omitempty"`
 }
 
-//var (
-//	UserModel *User
-//)
-
 type userModel struct{}
+
+var GlobalUserSalt = beego.AppConfig.String("GlobalUserSalt")
 
 func (*userModel) GetAllNum(scontent ...string) (num int64, err error) {
 	query := map[string]interface{}{}
@@ -87,22 +87,30 @@ func (*userModel) EnsureUser(m *User) (*User, error) {
 			return nil, err
 		}
 	} else {
-		oldUser.Email = m.Email
-		oldUser.Active = m.Active
-		oldUser.Role = m.Role
+		//oldUser.Email = m.Email
 		_, err := Ormer().Update(oldUser)
 		if err != nil {
 			return nil, err
 		}
 	}
-	Ormer()
 	return oldUser, err
 }
 
 func (*userModel) AddUser(m *User) (id int64, err error) {
+	if m.Id != 0 {
+		user := &User{Id: m.Id}
+		if m.Password != "" {
+			m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
+		} else {
+			if err := Ormer().Read(user, "id"); err != nil {
+				return 0, err
+			}
+			m.Password = encode.EncodePassword(user.Password, GlobalUserSalt)
+		}
+	}
 	id, err = Ormer().Insert(m)
 	if err != nil {
-		return
+		return 0, err
 	}
 	return id, nil
 }
@@ -117,11 +125,3 @@ func (*userModel) GetUserDetail(name string) (user *User, err error) {
 	Ormer().LoadRelated(user, "Role")
 	return user, nil
 }
-
-//func (*userModel) EditUser(id int64) (v *User, err error) {
-//	if c.Ctx.Input.Method() == "GET" {
-//		c.TplName = "user/add.html"
-//		return
-//	}
-//	return
-//}

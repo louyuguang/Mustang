@@ -1,10 +1,9 @@
 package main
 
 import (
-	_ "Mustang/controllers"
+	"Mustang/models"
 	_ "Mustang/routers"
 	"Mustang/utils"
-	"Mustang/models"
 	"encoding/gob"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
