@@ -52,8 +52,8 @@
                     <label class="col-sm-2 control-label">是否启用</label>
                     <div class="col-sm-8">
                         <div class="radio i-checks">
-                            <label><input type="radio" value=1 name="active" checked>启用</label>
-                            <label><input type="radio" value=0 name="active">禁用</label>
+                            <label><input type="radio" value=1 name="is_active" checked>启用</label>
+                            <label><input type="radio" value=0 name="is_active">禁用</label>
                         </div>
                     </div>
                 </div>
@@ -75,9 +75,9 @@
             $('#userAddBtn').on('click', function (e) {
                 var form = $('#userForm').serializeJSON()
                 form['role'] = {'id': parseInt(form['role'])}
-                form['is_active'] = Boolean(form['active'])
+                form['is_active'] = Boolean(parseInt(form['is_active']))
                 Net.post({
-                    url: {{urlfor "UserController.Add"}},
+                    url: location.pathname,
                     data: JSON.stringify(form),
                     btn: $('#userAddBtn'),
                     icon: $('#iconWait'),

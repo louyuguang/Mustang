@@ -38,7 +38,7 @@ func (c *UserController) Add() {
 	}
 	//POST, Add a new User
 	var user *models.User
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &user);err != nil {
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &user); err != nil {
 		logs.Error("User's form error. %v", err)
 		c.CustomAbort(http.StatusInternalServerError, err.Error())
 	}
@@ -61,39 +61,36 @@ func (c *UserController) Update() {
 	if c.Ctx.Input.Method() == "GET" {
 		roles, err := models.RoleModel.GetAllRoles()
 		if err != nil {
-			logs.Error("get all roles error")
+			c.Fail(err)
 			return
 		}
 		if id != 0 {
 			user, err := models.UserModel.GetUserById(id)
 			if err != nil {
 				logs.Error("get by id (%d) error.%v", id, err)
+				c.Fail(err)
 				return
 			}
 			c.Data["UserAdd"] = user
 		}
 		c.Data["Roles"] = roles
+		//c.TplName = "usercontroller/add.tpl"
 		return
 	}
 	//POST
 	var user *models.User
-	if id != 0 {
-		user.Id = id
-	} else {
-		//Add a new User
-		err := json.Unmarshal(c.Ctx.Input.RequestBody, &user)
-		if err != nil {
-			logs.Error("User's form error. %v", err)
-			c.Data["json"] = map[string]interface{}{"status": -1, "error": "User's form error."}
-			c.ServeJSON()
-			return
-		}
-		_, err = models.UserModel.AddUser(user)
-		if err != nil {
-			//c.Data[""]
-			return
-		}
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &user)
+	if err != nil {
+		logs.Error("User's form error. %v", err)
+		c.Fail(err)
+		return
 	}
+	_, err = models.UserModel.AddUser(user)
+	if err != nil {
+		c.Fail(err)
+		return
+	}
+	c.Success("用户信息更新成功！")
 }
 
 // @router /detail [get]

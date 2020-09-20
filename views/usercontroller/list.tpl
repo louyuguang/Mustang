@@ -44,8 +44,8 @@
                                 <td class="text-center">{{ .Email }}</td>
                                 <td class="text-center">{{ if .Active }}是{{else}}否{{end}}</td>
                                 <td class="text-center" style="width:150px">
-                                    <a class="fa fa-pencil-square-o audit-tip" title="编辑" onclick="user_edit({{ .Id }})"
-                                       href="#"></a>
+                                    <a class="fa fa-pencil-square-o audit-tip" title="编辑" onclick=""
+                                       href="{{ urlfor "UserController.Update" ":id" .Id }}"></a>
                                     <a class="text-red fa fa-trash-o delete-tip" title="删除"
                                        onclick="user_delete({{ .Id }})" href="#"></a>
                                 </td>
@@ -73,10 +73,6 @@
 {{end}}
 {{define "self_footer_script"}}
     <script>
-        function user_edit(user_id) {
-            document.location.href = "{{urlfor "UserController.Update"}}" + '/' + user_id
-        }
-
         function user_delete(user_id) {
             ui.confirm('确定删除用户?', function () {
                 Net.post({

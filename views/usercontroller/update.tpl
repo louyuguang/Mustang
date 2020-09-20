@@ -8,11 +8,18 @@
         <!-- form start -->
         <form class="form-horizontal" id="userForm" action="" method="post">
             <div class="box-body">
+                <div class="form-group" hidden>
+                    <label for="inputId" class="col-sm-2 control-label">Id<span class="text-red">*</span></label>
+                    <div class="col-sm-8">
+                        <input type="text" name="id" value="{{ .UserAdd.Id }}" class="form-control"
+                               id="id" placeholder="id" readonly>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="inputUsername" class="col-sm-2 control-label">用户名<span class="text-red">*</span></label>
                     <div class="col-sm-8">
                         <input type="text" name="username" value="{{ .UserAdd.UserName }}" class="form-control"
-                               id="username" placeholder="username">
+                               id="username" placeholder="username" readonly>
                     </div>
                 </div>
                 <div class="form-group">
@@ -77,29 +84,18 @@
         $(function () {
             $('#roleSelect').select2()
             $('#userAddBtn').on('click', function (e) {
+                var form = $('#userForm').serializeJSON()
+                form['id'] = parseInt(form['id'])
+                form['role'] = {'id': parseInt(form['role'])}
+                form['is_active'] = Boolean(parseInt(form['is_active']))
                 Net.post({
-                    url: "{{urlfor "UserController.Add"}}"+"?id="+{{.UserAdd.Id}},
-                    data: JSON.stringify($('#userForm').serializeObject()),
+                    url: location.pathname,
+                    data: JSON.stringify(form),
                     btn: $('#userAddBtn'),
                     icon: $('#iconWait'),
                     go: getReferrer("{{urlfor "UserController.List"}}")
                 });
             })
-            $.fn.serializeObject = function () {
-                var o = {};
-                var a = this.serializeArray();
-                $.each(a, function () {
-                    if (o[this.name]) {
-                        if (!o[this.name].push) {
-                            o[this.name] = [o[this.name]];
-                        }
-                        o[this.name].push(this.value || '');
-                    } else {
-                        o[this.name] = this.value || '';
-                    }
-                });
-                return o;
-            }
         })
     </script>
 {{end}}

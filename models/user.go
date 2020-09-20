@@ -99,14 +99,18 @@ func (*userModel) EnsureUser(m *User) (*User, error) {
 func (*userModel) AddUser(m *User) (id int64, err error) {
 	if m.Id != 0 {
 		user := &User{Id: m.Id}
-		if m.Password == "" {
-			if err := Ormer().Read(user, "id"); err != nil {
-				return 0, err
-			}
-			m.Password = user.Password
+		if err := Ormer().Read(user, "id"); err != nil {
+			return 0, err
 		}
+		if m.Password == "" {
+			m.Password = user.Password
+		} else {
+			m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
+		}
+		m.UserName = user.UserName
+	} else {
+		m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
 	}
-	m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
 	id, err = Ormer().InsertOrUpdate(m)
 	if err != nil {
 		return 0, err
