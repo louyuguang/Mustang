@@ -3,6 +3,7 @@ package user
 import (
 	"Mustang/controllers/base"
 	"Mustang/models"
+	"fmt"
 	//"Mustang/utils/hack"
 	"Mustang/utils/logs"
 	"encoding/json"
@@ -29,7 +30,8 @@ func (c *UserController) Add() {
 	if c.Ctx.Input.Method() == "GET" {
 		roles, err := models.RoleModel.GetAllRoles()
 		if err != nil {
-			c.CustomAbort(http.StatusInternalServerError, err.Error())
+			c.Fail(err)
+			return
 		}
 		c.Data["Roles"] = roles
 		return
@@ -38,16 +40,18 @@ func (c *UserController) Add() {
 	var user *models.User
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &user);err != nil {
 		logs.Error("User's form error. %v", err)
-		//c.Data["json"] = map[string]interface{}{"status": -1, "error": "User's form error."}
-		//c.ServeJSON()
-		//return
 		c.CustomAbort(http.StatusInternalServerError, err.Error())
+	}
+	if user.UserName == "" || user.RealName == "" {
+		c.Fail("用户名或姓名不能为空！")
+		return
 	}
 	_, err := models.UserModel.AddUser(user)
 	if err != nil {
 		c.Fail(err)
+		return
 	}
-	c.Success("Add User Success!")
+	c.Success(fmt.Sprintf("用户%s创建成功！", user.UserName))
 }
 
 // @router /update/:id [get,post]
@@ -104,13 +108,15 @@ func (c *UserController) List() {
 	cnt, err := models.UserModel.GetAllNum(scontent)
 	if err != nil || cnt == -1 {
 		logs.Error("get all users nums error")
+		c.Fail(err)
 		return
 	}
 
 	pager := c.SetPaginator(pers, cnt)
 	users, err := models.UserModel.GetUsers(pers, pager.Offset(), scontent)
 	if err != nil {
-		c.CustomAbort(http.StatusInternalServerError, err.Error())
+		c.Fail(err)
+		return
 	}
 	c.Data["Users"] = users
 	c.Data["Scontent"] = scontent
@@ -118,5 +124,14 @@ func (c *UserController) List() {
 
 // @router /delete [post]
 func (c *UserController) Delete() {
-	return
+	var user *models.User
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &user); err != nil {
+		c.Fail(err)
+		return
+	}
+	if err := models.UserModel.DeleteById(user); err != nil {
+		c.Fail(err)
+		return
+	}
+	c.Success("删除成功！")
 }

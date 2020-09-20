@@ -74,14 +74,14 @@
 {{define "self_footer_script"}}
     <script>
         function user_edit(user_id) {
-            document.location.href = "{{urlfor "UserController.Add"}}" + '/' + user_id
+            document.location.href = "{{urlfor "UserController.Update"}}" + '/' + user_id
         }
 
         function user_delete(user_id) {
             ui.confirm('确定删除用户?', function () {
                 Net.post({
                     url: "{{ urlfor "UserController.Delete" }}",
-                    data: {"id": user_id},
+                    data: JSON.stringify({"id": parseInt(user_id)}),
                     reload: true
                 });
             });

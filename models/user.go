@@ -10,9 +10,9 @@ import (
 type User struct {
 	Id       int64      `orm:"pk;auto" json:"id,omitempty"`
 	Role     *Role      `orm:"rel(fk);default(4);column(role_id)" json:"role"`
-	UserName string     `orm:"index;unique;size(200);column(username)" json:"username,omitempty"`
+	UserName string     `orm:"index;unique;size(200);column(username);" json:"username,omitempty"`
 	Password string     `orm:"size(255)" json:"password"`
-	RealName string     `orm:"size(255)" json:"realname"`
+	RealName string     `orm:"size(255)" json:"realname,omitempty"`
 	Email    string     `orm:"size(200)" json:"email,omitempty"`
 	Active   bool       `orm:"default(true)" json:"is_active"`
 	Created  *time.Time `orm:"auto_now_add;type(datetime)" json:"createTime,omitempty"`
@@ -44,7 +44,7 @@ func (*userModel) GetUsers(pers int, offset int, scontent ...string) ([]*User, e
 		query["username__icontains"] = scontent
 	}
 	qs = BuildFilter(qs, query)
-	qs.Limit(pers, offset).RelatedSel().All(&users)
+	_, _ = qs.Limit(pers, offset).RelatedSel().All(&users)
 	return users, nil
 }
 
@@ -99,20 +99,27 @@ func (*userModel) EnsureUser(m *User) (*User, error) {
 func (*userModel) AddUser(m *User) (id int64, err error) {
 	if m.Id != 0 {
 		user := &User{Id: m.Id}
-		if m.Password != "" {
-			m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
-		} else {
+		if m.Password == "" {
 			if err := Ormer().Read(user, "id"); err != nil {
 				return 0, err
 			}
-			m.Password = encode.EncodePassword(user.Password, GlobalUserSalt)
+			m.Password = user.Password
 		}
 	}
-	id, err = Ormer().Insert(m)
+	m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
+	id, err = Ormer().InsertOrUpdate(m)
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (*userModel) DeleteById(m *User) error {
+	_, err := Ormer().Delete(m, "id")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (*userModel) GetUserDetail(name string) (user *User, err error) {

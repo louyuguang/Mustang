@@ -36,25 +36,12 @@ func (c *AuthController) Login() {
 	}
 	var msg string
 	var userInfo UserLoginForm
-	//paramByte, err := hack.FormToJson(c.Ctx.Input.RequestBody)
-	//if err != nil {
-	//	logs.Error("%v", err)
-	//	c.Data["json"] = map[string]interface{}{"status": -1, "error": "post data invalid"}
-	//	c.ServeJSON()
-	//	return
-	//}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &userInfo); err != nil {
-		//logs.Error("get login form body error. %v", err)
-		//c.Data["json"] = map[string]interface{}{"status": -1, "error": "Get frontend body error."}
-		//c.ServeJSON()
-		//return
 		c.CustomAbort(http.StatusInternalServerError, err.Error())
 	}
 	if userInfo.UserName == "" || userInfo.Password == "" {
-		//c.Data["json"] = map[string]interface{}{"status": -1, "error": "username or password cannot be empty!"}
-		//c.ServeJSON()
-		//return
 		c.Fail("username or password cannot be empty!")
+		return
 	}
 	var authenticator Authenticator
 
@@ -68,21 +55,14 @@ func (c *AuthController) Login() {
 	if err != nil {
 		msg = fmt.Sprintf("try to login in with usercontroller (%s) error %v ", authModel.UserName, err)
 		logs.Warning(msg)
-		//c.Data["json"] = map[string]interface{}{"status": 1, "msg": "用户名或者密码不正确"}
-		//c.ServeJSON()
-		//return
 		c.Fail( "用户名或者密码不正确")
 		return
 	}
 
 	user, err = models.UserModel.EnsureUser(user)
 	if err != nil {
-		//msg = "Internal server error."
-		//logs.Error(msg)
-		//c.Data["json"] = map[string]interface{}{"status": -1, "msg": "内部未知错误"}
-		//c.ServeJSON()
-		//return
-		c.CustomAbort(http.StatusInternalServerError, err.Error())
+		c.Fail(err)
+		return
 	}
 	c.SetSession("userId", user.Id)
 	c.SetSession("userName", user.UserName)

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 	"github.com/go-sql-driver/mysql"
 	"net/http"
 )
@@ -29,11 +28,6 @@ type ResultHandlerController struct {
 	beego.Controller
 }
 
-type errorInterface interface {
-	Error()
-}
-
-
 func (c *ResultHandlerController) Success(data interface{}) {
 	c.Ctx.Output.SetStatus(http.StatusOK)
 	c.Data["json"] = map[string]interface{}{"status": 0, "msg": data}
@@ -41,10 +35,9 @@ func (c *ResultHandlerController) Success(data interface{}) {
 }
 
 func (c *ResultHandlerController) Fail(data interface{}) {
-	errorResult := &ErrorResult{}
+	errorResult := &ErrorResult{Code: http.StatusOK}
 	switch e := data.(type) {
 	case *mysql.MySQLError:
-		errorResult.Code = http.StatusBadRequest
 		errorResult.SubCode = -1
 		if e.Number == 1062 {
 			errorResult.Msg = "Resources already exist! "
@@ -52,17 +45,12 @@ func (c *ResultHandlerController) Fail(data interface{}) {
 			errorResult.Msg = e.Message
 		}
 	case string:
-		errorResult.Code = http.StatusOK
 		errorResult.SubCode = 1
 		errorResult.Msg = e
 	case error:
-		if data == orm.ErrNoRows {
-			errorResult.Code = http.StatusNotFound
-		}
 		errorResult.SubCode = -1
 		errorResult.Msg = e.Error()
 	default:
-		errorResult.Code = http.StatusInternalServerError
 		errorResult.SubCode = -1
 		errorResult.Msg = "Internal server error."
 	}

@@ -4,7 +4,6 @@ import (
 	"Mustang/models"
 	"Mustang/utils/paginator"
 	"fmt"
-	"net/http"
 	"strconv"
 )
 
@@ -31,7 +30,8 @@ func (c *BaseController) Prepare() {
 	UserName := c.GetSession("userName")
 	user, err := models.UserModel.GetUserDetail(UserName.(string))
 	if err != nil {
-		c.CustomAbort(http.StatusInternalServerError, err.Error())
+		c.Fail(err)
+		return
 	}
 	c.Data["User"] = user
 }
