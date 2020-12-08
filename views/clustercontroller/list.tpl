@@ -2,7 +2,7 @@
 {{define "content"}}
     <div class="box">
         <div class="box-header">
-            <h4 class="box-title">用户列表</h4>
+            <h4 class="box-title">集群列表</h4>
             <div class="box-tools">
                 <form class="form-inline" id="search-form">
                     <div class="input-group" style="width: 300px;">
@@ -13,7 +13,7 @@
                                                                                     style="margin-left:0px"></i>
                             </button>
                         </div>
-                        <a href="{{ urlfor "UserController.Add" }}" class="btn btn-primary btn-sm pull-right">新建用户</a>
+                        <a href="{{ urlfor "ClusterController.Add" }}" class="btn btn-primary btn-sm pull-right">创建集群</a>
                     </div>
                 </form>
             </div>
@@ -28,25 +28,20 @@
                             <th class="text-center">ID</th>
                             <th class="text-center">集群名</th>
                             <th class="text-center">别名</th>
-                            <th class="text-center">集群地址</th>
                             <th class="text-center">操作</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {{ range .Users }}
+                        {{ range .Clusters }}
                             <tr role="row" class="odd">
                                 <td class="text-center">{{ .Id }}</td>
-                                <td class="text-center">{{ .UserName }}</td>
-                                <td class="text-center">
-                                    {{ .Role.Rolename }}
-                                </td>
-                                <td class="text-center">{{ .Email }}</td>
-                                <td class="text-center">{{ if .Active }}是{{else}}否{{end}}</td>
+                                <td class="text-center">{{ .ClusterName }}</td>
+                                <td class="text-center">{{ .AliasName }}</td>
                                 <td class="text-center" style="width:150px">
                                     <a class="fa fa-pencil-square-o audit-tip" title="编辑" onclick=""
-                                       href="{{ urlfor "UserController.Update" ":id" .Id }}"></a>
+                                       href="{{ urlfor "ClusterController.Update" ":id" .Id }}"></a>
                                     <a class="text-red fa fa-trash-o delete-tip" title="删除"
-                                       onclick="user_delete({{ .Id }})" href="#"></a>
+                                       onclick="cluster_delete({{ .Id }})" href="#"></a>
                                 </td>
                             </tr>
                         {{end}}
@@ -72,11 +67,11 @@
 {{end}}
 {{define "self_footer_script"}}
     <script>
-        function user_delete(user_id) {
-            ui.confirm('确定删除用户?', function () {
+        function cluster_delete(cluster_id) {
+            ui.confirm('确定删除集群?', function () {
                 Net.post({
-                    url: "{{ urlfor "UserController.Delete" }}",
-                    data: JSON.stringify({"id": parseInt(user_id)}),
+                    url: "{{ urlfor "ClusterController.Delete" }}",
+                    data: JSON.stringify({"id": parseInt(cluster_id)}),
                     reload: true
                 });
             });

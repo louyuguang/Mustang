@@ -19,6 +19,7 @@ func (c *UserController) URLMapping() {
 	c.Mapping("Delete", c.Delete)
 	c.Mapping("Detail", c.Detail)
 	c.Mapping("List", c.List)
+	c.Mapping("Update", c.Update)
 }
 
 func (c *UserController) Prepare() {

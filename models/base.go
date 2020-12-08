@@ -10,15 +10,19 @@ var (
 	globalOrm orm.Ormer
 	UserModel *userModel
 	RoleModel *roleModel
+	ClusterModel *clusterModel
 )
 
 func init() {
 	orm.RegisterModel(
 		new(User),
 		new(Role),
+		new(Cluster),
 	)
 
 	UserModel = &userModel{}
+	RoleModel = &roleModel{}
+	ClusterModel = &clusterModel{}
 }
 
 func Ormer() orm.Ormer {
