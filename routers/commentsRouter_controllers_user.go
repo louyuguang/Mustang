@@ -28,7 +28,7 @@ func init() {
     beego.GlobalControllerRouter["Mustang/controllers/user:UserController"] = append(beego.GlobalControllerRouter["Mustang/controllers/user:UserController"],
         beego.ControllerComments{
             Method: "Detail",
-            Router: "/detail",
+            Router: "/detail/:id",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

@@ -23,6 +23,7 @@ func (c *UserController) URLMapping() {
 
 func (c *UserController) Prepare() {
 	c.BaseController.Prepare()
+	c.Data["LevelOne"] = map[string]string{"content": "用户管理"}
 }
 
 // @router /add [get,post]
@@ -93,7 +94,7 @@ func (c *UserController) Update() {
 	c.Success("用户信息更新成功！")
 }
 
-// @router /detail [get]
+// @router /detail/:id [get]
 func (c *UserController) Detail() {
 
 }
