@@ -87,11 +87,11 @@ func (c *UserController) Update() {
 		c.Fail(err)
 		return
 	}
-	_, err = models.UserModel.AddUser(user)
-	if err != nil {
+	if err = models.UserModel.UpdateUserById(user); err != nil {
 		c.Fail(err)
 		return
 	}
+
 	c.Success("用户信息更新成功！")
 }
 

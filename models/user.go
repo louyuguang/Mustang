@@ -97,25 +97,28 @@ func (*userModel) EnsureUser(m *User) (*User, error) {
 }
 
 func (*userModel) AddUser(m *User) (id int64, err error) {
-	if m.Id != 0 {
-		user := &User{Id: m.Id}
-		if err := Ormer().Read(user, "id"); err != nil {
-			return 0, err
-		}
-		if m.Password == "" {
-			m.Password = user.Password
-		} else {
-			m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
-		}
-		m.UserName = user.UserName
-	} else {
-		m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
-	}
-	id, err = Ormer().InsertOrUpdate(m)
+	m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
+	id, err = Ormer().Insert(m)
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (*userModel) UpdateUserById(m *User) (err error) {
+	v := &User{Id: m.Id}
+	if err = Ormer().Read(v); err != nil {
+		return
+	}
+	if m.Password != "" {
+		v.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
+	}
+	v.RealName = m.RealName
+	v.Email = m.Email
+	v.Role = m.Role
+	v.Active = m.Active
+	_, err = Ormer().Update(v)
+	return
 }
 
 func (*userModel) DeleteById(m *User) error {

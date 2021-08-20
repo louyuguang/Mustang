@@ -2,16 +2,18 @@ package auth
 
 import (
 	"Mustang/controllers/auth/db"
-	"Mustang/controllers/base"
+	"Mustang/utils/hack"
+
 	"Mustang/models"
 	"Mustang/utils/logs"
 	"encoding/json"
 	"fmt"
+	"github.com/astaxie/beego"
 	"net/http"
 )
 
 type AuthController struct {
-	base.ResultHandlerController
+	beego.Controller
 }
 
 func (c *AuthController) URLMapping() {
@@ -29,20 +31,26 @@ type UserLoginForm struct {
 	Password string `json:"password"`
 }
 
+type Result struct {
+
+}
+
 // @router /login [get,post]
 func (c *AuthController) Login() {
 	if c.Ctx.Input.Method() == "GET" {
 		return
 	}
-	var msg string
 	var userInfo UserLoginForm
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &userInfo); err != nil {
-		c.CustomAbort(http.StatusInternalServerError, err.Error())
-	}
-	if userInfo.UserName == "" || userInfo.Password == "" {
-		c.Fail("username or password cannot be empty!")
+		logs.Error("get body error. %v", err)
+		c.Ctx.Output.SetStatus(http.StatusBadRequest)
+		c.Ctx.Output.Body(hack.Slice("Invalid param"))
 		return
 	}
+	//if userInfo.UserName == "" || userInfo.Password == "" {
+	//	c.Fail("username or password cannot be empty!")
+	//	return
+	//}
 	var authenticator Authenticator
 
 	authModel := models.AuthModel{
@@ -53,21 +61,24 @@ func (c *AuthController) Login() {
 	authenticator = &db.DBAuth{}
 	user, err := authenticator.Authenticate(authModel)
 	if err != nil {
-		msg = fmt.Sprintf("try to login in with usercontroller (%s) error %v ", authModel.UserName, err)
-		logs.Warning(msg)
-		c.Fail( "用户名或者密码不正确")
+		logs.Warning(fmt.Sprintf("try to login in with usercontroller (%s) error %v ", authModel.UserName, err))
+		c.Ctx.Output.SetStatus(http.StatusBadRequest)
+		c.Ctx.Output.Body(hack.Slice(fmt.Sprintf("Login failed. %v", err)))
 		return
 	}
 
 	user, err = models.UserModel.EnsureUser(user)
 	if err != nil {
-		c.Fail(err)
+		c.Ctx.Output.SetStatus(http.StatusForbidden)
+		c.Ctx.Output.Body(hack.Slice(err.Error()))
 		return
 	}
 	c.SetSession("userId", user.Id)
 	c.SetSession("userName", user.UserName)
 	c.SetSession("role", user.Role)
-	c.Success(nil)
+	//c.Data["json"] = base.Result{Data: struct{data string}{data: "success"}}
+	c.Ctx.Output.SetStatus(http.StatusOK)
+	//c.ServeJSON()
 }
 
 // @router /logout [get]

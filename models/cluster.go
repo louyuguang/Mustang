@@ -9,8 +9,8 @@ type Cluster struct {
 
 type clusterModel struct{}
 
-func (*clusterModel) AddCluster(C *Cluster) (id int64, err error) {
-	id, err = Ormer().InsertOrUpdate(C)
+func (*clusterModel) AddCluster(m *Cluster) (id int64, err error) {
+	id, err = Ormer().InsertOrUpdate(m)
 	if err != nil {
 		return 0, err
 	}
