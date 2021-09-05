@@ -1,15 +1,34 @@
 package models
 
+import "github.com/beego/beego/v2/adapter/validation"
+
 type Cluster struct {
 	Id          int64  `orm:"pk;auto" json:"id,omitempty"`
-	ClusterName string `orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
+	ClusterName string `valid:"Required" orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
 	AliasName   string `orm:"size(255);column(aliasname)" json:"aliasname"`
-	KubeConfig  string `orm:"null;type(text)" json:"kubeconfig,omitempty"`
+	KubeConfig  string `valid:"Required" orm:"null;type(text)" json:"kubeconfig,omitempty"`
 }
 
 type clusterModel struct{}
 
-func (*clusterModel) AddCluster(m *Cluster) (id int64, err error) {
+func (*clusterModel) valid(c *Cluster) error {
+	valid := validation.Validation{}
+	b, err := valid.Valid(c)
+	if err != nil {
+		return err
+	}
+	if !b {
+		for _, err := range valid.Errors {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *clusterModel) AddCluster(m *Cluster) (id int64, err error) {
+	if err := c.valid(m); err != nil {
+		return 0, err
+	}
 	id, err = Ormer().InsertOrUpdate(m)
 	if err != nil {
 		return 0, err
