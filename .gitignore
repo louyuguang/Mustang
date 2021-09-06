@@ -5,3 +5,4 @@ go_build_Mustang_darwin
 vendor
 go_build_Mustang
 lastupdate.tmp
+go_build_main_go
