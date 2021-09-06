@@ -1,42 +1,36 @@
 package models
 
-import "github.com/beego/beego/v2/adapter/validation"
-
 type Cluster struct {
-	Id          int64  `orm:"pk;auto" json:"id,omitempty"`
-	ClusterName string `valid:"Required" orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
-	AliasName   string `orm:"size(255);column(aliasname)" json:"aliasname"`
-	KubeConfig  string `valid:"Required" orm:"null;type(text)" json:"kubeconfig,omitempty"`
+	Id                int64              `orm:"pk;auto" json:"id,omitempty"`
+	ClusterName       string             `valid:"Required" orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
+	AliasName         string             `valid:"Required" orm:"size(255);column(aliasname)" json:"aliasname"`
+	KubeConfig        string             `valid:"Required" orm:"null;type(text)" json:"kubeconfig,omitempty"`
+	EnvClusterBinding *EnvClusterBinding `orm:"rel(fk);column(env_id);default(0)" json:"envClusterBinding"`
 }
 
 type clusterModel struct{}
 
-func (*clusterModel) valid(c *Cluster) error {
-	valid := validation.Validation{}
-	b, err := valid.Valid(c)
-	if err != nil {
+func (c *clusterModel) Add(m *Cluster) (id int64, err error) {
+	if err := valid(m); err != nil {
+		return 0, err
+	}
+	id, err = Ormer().Insert(m)
+	return
+}
+
+func (c *clusterModel) UpdateById(m *Cluster) (err error) {
+	if err := valid(m); err != nil {
 		return err
 	}
-	if !b {
-		for _, err := range valid.Errors {
-			return err
-		}
+	v := Cluster{Id: m.Id}
+	if err = Ormer().Read(&v, "Id"); err == nil {
+		_, err = Ormer().Update(m)
+		return err
 	}
-	return nil
+	return
 }
 
-func (c *clusterModel) AddCluster(m *Cluster) (id int64, err error) {
-	if err := c.valid(m); err != nil {
-		return 0, err
-	}
-	id, err = Ormer().InsertOrUpdate(m)
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
-}
-
-func (*clusterModel) GetClusterById(id int64) (v *Cluster, err error) {
+func (*clusterModel) GetById(id int64) (v *Cluster, err error) {
 	v = &Cluster{Id: id}
 	if err = Ormer().Read(v); err != nil {
 		return nil, err
@@ -67,6 +61,16 @@ func (*clusterModel) GetClusters(pers int, offset int, scontent ...string) ([]*C
 	}
 	qs = BuildFilter(qs, query)
 	_, _ = qs.Limit(pers, offset).RelatedSel().All(&clusters)
+	return clusters, nil
+}
+
+func (*clusterModel) GetAllWithoutBinding() ([]*Cluster, error) {
+	var clusters []*Cluster
+	qs := Ormer().QueryTable(new(Cluster))
+	_, err := qs.Filter("env_id", 0).All(&clusters)
+	if err != nil {
+		return nil, err
+	}
 	return clusters, nil
 }
 
