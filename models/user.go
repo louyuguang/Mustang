@@ -5,8 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/beego/beego/v2/adapter/validation"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 )
@@ -26,20 +24,6 @@ type User struct {
 type userModel struct{}
 
 var GlobalUserSalt = beego.AppConfig.String("GlobalUserSalt")
-
-func (*userModel) valid(u *User) error {
-	valid := validation.Validation{}
-	b, err := valid.Valid(u)
-	if err != nil {
-		return err
-	}
-	if !b {
-		for _, err := range valid.Errors {
-			return err
-		}
-	}
-	return nil
-}
 
 func (*userModel) GetAllNum(scontent ...string) (num int64, err error) {
 	query := map[string]interface{}{}
@@ -117,7 +101,7 @@ func (*userModel) EnsureUser(m *User) (*User, error) {
 
 func (u *userModel) AddUser(m *User) (id int64, err error) {
 	m.Password = encode.EncodePassword(m.Password, GlobalUserSalt)
-	if err := u.valid(m); err != nil {
+	if err := valid(m); err != nil {
 		return 0, err
 	}
 	if m.Role.Id == 0 {
@@ -142,7 +126,7 @@ func (u *userModel) UpdateUserById(m *User) (err error) {
 	v.Email = m.Email
 	v.Role = m.Role
 	v.Active = m.Active
-	if err := u.valid(m); err != nil {
+	if err := valid(m); err != nil {
 		return err
 	}
 	if m.Role.Id == 0 {

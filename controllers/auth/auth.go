@@ -32,7 +32,6 @@ type UserLoginForm struct {
 }
 
 type Result struct {
-
 }
 
 // @router /login [get,post]
@@ -76,9 +75,9 @@ func (c *AuthController) Login() {
 	c.SetSession("userId", user.Id)
 	c.SetSession("userName", user.UserName)
 	c.SetSession("role", user.Role)
-	//c.Data["json"] = base.Result{Data: struct{data string}{data: "success"}}
+	c.Data["json"] = map[string]interface{}{"status": 0, "msg": ""}
 	c.Ctx.Output.SetStatus(http.StatusOK)
-	//c.ServeJSON()
+	c.ServeJSON()
 }
 
 // @router /logout [get]

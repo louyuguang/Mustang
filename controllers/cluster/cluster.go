@@ -36,11 +36,7 @@ func (c *ClusterController) Add() {
 		logs.Error("Cluster's form error. %v", err)
 		c.CustomAbort(http.StatusInternalServerError, err.Error())
 	}
-	if cluster.ClusterName == "" || cluster.KubeConfig == "" || cluster.AliasName == "" {
-		c.Fail("集群名、集群别名、kubeconfig不能为空！")
-		return
-	}
-	_, err := models.ClusterModel.AddCluster(cluster)
+	_, err := models.ClusterModel.Add(cluster)
 	if err != nil {
 		c.Fail(err)
 		return
@@ -68,7 +64,7 @@ func (c *ClusterController) Update() {
 	//GET
 	if c.Ctx.Input.Method() == "GET" {
 		if id != 0 {
-			cluster, err := models.ClusterModel.GetClusterById(id)
+			cluster, err := models.ClusterModel.GetById(id)
 			if err != nil {
 				logs.Error("get by id (%d) error.%v", id, err)
 				c.Fail(err)
@@ -88,7 +84,7 @@ func (c *ClusterController) Update() {
 		c.Fail(err)
 		return
 	}
-	_, err = models.ClusterModel.AddCluster(cluster)
+	err = models.ClusterModel.UpdateById(cluster)
 	if err != nil {
 		c.Fail(err)
 		return

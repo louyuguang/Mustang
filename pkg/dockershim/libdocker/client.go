@@ -1,8 +1,8 @@
 package libdocker
 
 import (
-	dockerapi "github.com/docker/docker/client"
 	"Mustang/utils/logs"
+	dockerapi "github.com/docker/docker/client"
 )
 
 // Get a *dockerapi.Client, either using the endpoint passed in, or using
