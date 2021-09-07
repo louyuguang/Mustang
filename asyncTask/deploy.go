@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/RichardKnop/machinery/v1/tasks"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,12 +27,28 @@ func Deploy(id int64) error {
 		if err != nil {
 			return err
 		}
+		// get k8s clientSet and deploymentClient
 		clientSet, err := k8s.GetClientSetFromByte([]byte(cluster.KubeConfig))
+		deploymentClient := clientSet.AppsV1().Deployments(deploy.EnvClusterBinding.Namespace)
 		if err != nil {
 			return err
 		}
+		// generate deployment object
 		deployment := k8s.GetDeployment(deploy)
-		_, err = clientSet.AppsV1().Deployments(deploy.EnvClusterBinding.Namespace).Create(context.TODO(), deployment, metav1.CreateOptions{})
+		// get project's deployment object from k8s cluster
+		// if deployment exist, exec update(), if not exec create()
+		if oldDeployment, err := deploymentClient.Get(context.TODO(), deployment.Name, metav1.GetOptions{}); err != nil {
+			if errors.IsNotFound(err) {
+				_, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
+			} else {
+				return err
+			}
+		} else {
+			deployment.Spec.Replicas = oldDeployment.Spec.Replicas
+			if _, err := deploymentClient.Update(context.TODO(), deployment, metav1.UpdateOptions{}); err != nil {
+				return err
+			}
+		}
 		if err != nil {
 			return err
 		}
