@@ -8,7 +8,7 @@
                 <a href="{{urlfor "UserController.List"}}"> <i class="fa fa-circle-o"></i> 用户列表</a>
             </li>
             <li class="audit">
-                <a href=""> <i class="fa fa-circle-o"></i> 操作记录</a>
+                <a href="#"> <i class="fa fa-circle-o"></i> 操作记录</a>
             </li>
         </ul>
     </li>
@@ -19,11 +19,10 @@
                 <a href="{{urlfor "ClusterController.List"}}"> <i class="fa fa-circle-o"></i> 集群信息列表</a>
             </li>
             <li class="env_list">
-                <a href=""> <i class="fa fa-circle-o"></i> 环境与集群关系设置</a>
+                <a href="#"> <i class="fa fa-circle-o"></i> 环境与集群关系设置</a>
             </li>
         </ul>
     </li>
-{{/*    {% endif %}*/}}
 
     <!-- 项目管理 -->
     <li class="treeview" id="project">
@@ -53,10 +52,10 @@
         <a href="#"><i class="fa  fa-cloud-upload"></i> <span>部署管理</span> <i class="fa fa-angle-left pull-right"></i></a>
         <ul class="treeview-menu">
             <li class="add">
-                <a href=""> <i class="fa fa-circle-o"></i> 新建部署</a>
+                <a href="{{urlfor "DeployController.Add"}}"> <i class="fa fa-circle-o"></i> 新建部署</a>
             </li>
             <li class="list">
-                <a href=""> <i class="fa fa-circle-o"></i> 部署列表</a>
+                <a href="{{urlfor "DeployController.List"}}"> <i class="fa fa-circle-o"></i> 部署列表</a>
             </li>
         </ul>
     </li>

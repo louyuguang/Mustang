@@ -1,11 +1,11 @@
 package models
 
 type Cluster struct {
-	Id                int64              `orm:"pk;auto" json:"id,omitempty"`
-	ClusterName       string             `valid:"Required" orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
-	AliasName         string             `valid:"Required" orm:"size(255);column(aliasname)" json:"aliasname"`
-	KubeConfig        string             `valid:"Required" orm:"null;type(text)" json:"kubeconfig,omitempty"`
-	EnvClusterBinding *EnvClusterBinding `orm:"rel(fk);column(env_id);default(0)" json:"envClusterBinding"`
+	Id          int64  `orm:"pk;auto" json:"id,omitempty"`
+	ClusterName string `valid:"Required" orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
+	AliasName   string `valid:"Required" orm:"size(255);column(aliasname)" json:"aliasname"`
+	KubeConfig  string `valid:"Required" orm:"null;type(text)" json:"kubeconfig,omitempty"`
+	EnvId       int64  `orm:"column(env_id);default(0)" json:"envId"`
 }
 
 type clusterModel struct{}
