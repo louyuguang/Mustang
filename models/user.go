@@ -32,7 +32,7 @@ func (*userModel) GetAllNum(scontent ...string) (num int64, err error) {
 	}
 	qs := Ormer().QueryTable(new(User))
 	qs = BuildFilter(qs, query)
-	num, err = qs.Count()
+	num, err = qs.RelatedSel().Count()
 	if err != nil {
 		return -1, err
 	}
