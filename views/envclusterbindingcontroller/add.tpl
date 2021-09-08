@@ -11,14 +11,14 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label">环境名<span class="text-red">*</span></label>
                 <div class="col-sm-8">
-                    <input type="text" name="envName" value="" class="form-control"
+                    <input type="text" name="envName" value="{{ .EnvAdd.EnvName }}" class="form-control"
                            id="envname" placeholder="production">
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label">命名空间<span class="text-red">*</span></label>
                 <div class="col-sm-8">
-                    <input type="text" name="namespace" value="" class="form-control"
+                    <input type="text" name="namespace" value="{{ .EnvAdd.Namespace }}" class="form-control"
                            id="namespace" placeholder="default">
                 </div>
             </div>

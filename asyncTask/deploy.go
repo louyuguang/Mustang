@@ -8,10 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/RichardKnop/machinery/v1/tasks"
-
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -48,9 +46,6 @@ func Deploy(id int64) error {
 			if _, err := deploymentClient.Update(context.TODO(), deployment, metav1.UpdateOptions{}); err != nil {
 				return err
 			}
-		}
-		if err != nil {
-			return err
 		}
 		logs.Info("Env：%s ClusterId: %d deploy %s success.", deploy.EnvClusterBinding.EnvName, int64(clusterId), deploy.ProjectName)
 	}
