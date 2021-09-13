@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 type EnvClusterBindingController struct {
@@ -26,21 +25,34 @@ func (c *EnvClusterBindingController) Prepare() {
 // @router /add [get,post]
 func (c *EnvClusterBindingController) Add() {
 	if c.Ctx.Input.Method() == "GET" {
-		clusters, err := models.ClusterModel.GetAllWithoutBinding()
+		clusterAll := make(map[int64]string)
+		clusters, err := models.ClusterModel.GetAll()
 		if err != nil {
 			c.Fail(err)
 			return
 		}
-		c.Data["Clusters"] = clusters
+		for _, cluster := range clusters {
+			clusterAll[cluster.Id] = cluster.ClusterName
+		}
+		c.Data["ClusterAll"] = clusterAll
 		return
 	}
 
-	var env models.EnvClusterBinding
+	env := &models.EnvClusterBinding{
+		EnvName:   c.GetString("envName"),
+		Namespace: c.GetString("namespace"),
+	}
 	r := c.GetStrings("clusterIds")
-	env.EnvName = c.GetString("envName")
-	env.Namespace = c.GetString("namespace")
-	env.ClusterIds = strings.Join(r, ",")
-	_, err := models.EnvClusterBindingModel.Add(&env)
+	for _, clusterId := range r {
+		id, _ := strconv.Atoi(clusterId)
+		cluster, err := models.ClusterModel.GetById(int64(id))
+		if err != nil {
+			c.Fail(err)
+			return
+		}
+		env.Clusters = append(env.Clusters, cluster)
+	}
+	_, err := models.EnvClusterBindingModel.Add(env)
 	if err != nil {
 		c.Fail(err)
 		return
@@ -68,31 +80,48 @@ func (c *EnvClusterBindingController) Update() {
 	//GET
 	if c.Ctx.Input.Method() == "GET" {
 		if id != 0 {
+			clusterAll, clusterSelect := make(map[int64]string), make(map[int64]string)
 			env, err := models.EnvClusterBindingModel.GetById(id)
 			if err != nil {
 				logs.Error("get by id (%d) error.%v", id, err)
 				c.Fail(err)
 				return
 			}
-			clusters, err := models.ClusterModel.GetAllWithoutBinding()
+			clusters, err := models.ClusterModel.GetAll()
 			if err != nil {
 				c.Fail(err)
 				return
 			}
-			c.Data["Clusters"] = clusters
+			for _, cluster := range clusters {
+				clusterAll[cluster.Id] = cluster.ClusterName
+			}
+			for _, envCluster := range env.Clusters {
+				clusterSelect[envCluster.Id] = envCluster.ClusterName
+			}
+			c.Data["ClusterAll"] = clusterAll
+			c.Data["ClusterSelect"] = clusterSelect
 			c.Data["EnvAdd"] = env
 		}
-		c.TplName = "envclusterbindingcontroller/add.tpl"
+		c.TplName = "envclusterbindingcontroller/add.html"
 		return
 	}
 	//POST
-	var env models.EnvClusterBinding
+	env := &models.EnvClusterBinding{
+		Id:        id,
+		EnvName:   c.GetString("envName"),
+		Namespace: c.GetString("namespace"),
+	}
 	r := c.GetStrings("clusterIds")
-	env.EnvName = c.GetString("envName")
-	env.Namespace = c.GetString("namespace")
-	env.ClusterIds = strings.Join(r, ",")
-	env.Id = id
-	if err := models.EnvClusterBindingModel.UpdateById(&env); err != nil {
+	for _, clusterId := range r {
+		id, _ := strconv.Atoi(clusterId)
+		cluster, err := models.ClusterModel.GetById(int64(id))
+		if err != nil {
+			c.Fail(err)
+			return
+		}
+		env.Clusters = append(env.Clusters, cluster)
+	}
+	if err := models.EnvClusterBindingModel.UpdateById(env); err != nil {
 		c.Fail(err)
 		return
 	}
@@ -101,11 +130,6 @@ func (c *EnvClusterBindingController) Update() {
 
 // @router /list [get]
 func (c *EnvClusterBindingController) List() {
-	type EnvAndCluster struct {
-		Env      *models.EnvClusterBinding
-		Clusters []*models.Cluster
-	}
-	var ec []EnvAndCluster
 	scontent := c.GetString("scontent")
 	pers := 10
 	cnt, err := models.EnvClusterBindingModel.GetAllNum(scontent)
@@ -121,15 +145,6 @@ func (c *EnvClusterBindingController) List() {
 		c.Fail(err)
 		return
 	}
-	for _, v := range envs {
-		var clusters []*models.Cluster
-		for _, id := range strings.Split(v.ClusterIds, ",") {
-			id, _ := strconv.Atoi(id)
-			cluster, _ := models.ClusterModel.GetById(int64(id))
-			clusters = append(clusters, cluster)
-		}
-		ec = append(ec, EnvAndCluster{v, clusters})
-	}
-	c.Data["Envs"] = ec
+	c.Data["Envs"] = envs
 	c.Data["Scontent"] = scontent
 }

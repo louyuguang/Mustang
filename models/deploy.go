@@ -12,7 +12,7 @@ type Deploy struct {
 	Image             string             `orm:"size(255);column(image)" json:"image"`
 	Port              int64              `orm:"size(255);column(port)" json:"port,string"`
 	Created           *time.Time         `orm:"auto_now_add;type(datetime)" json:"createTime,omitempty"`
-	EnvClusterBinding *EnvClusterBinding `valid:"Required" orm:"rel(fk);default(0);column(env_id)" json:"env"`
+	EnvClusterBinding *EnvClusterBinding `valid:"Required" orm:"rel(fk);default(0);column(env_id)" json:"envId"`
 }
 
 type deployModel struct{}
@@ -62,13 +62,9 @@ func (*deployModel) DeleteById(m *Deploy) error {
 
 func (*deployModel) UpdateById(m *Deploy) (err error) {
 	d := &Deploy{Id: m.Id}
-	if err = Ormer().Read(d); err != nil {
-		return err
+	if err = Ormer().Read(d); err == nil {
+		_, err = Ormer().Update(m)
+		return
 	}
-	d.Image = m.Image
-	d.Port = m.Port
-	if _, err = Ormer().Update(d); err != nil {
-		return err
-	}
-	return nil
+	return
 }

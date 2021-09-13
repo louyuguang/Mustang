@@ -238,4 +238,21 @@
         })
     }
 
+    function render_select_mulit(selectObj, selectedJson, AllJson) {
+        var selectdArr = []
+        for (var id in selectedJson) {
+            selectdArr.push(id)
+        }
+        for (var id in AllJson) {
+            if (inArray(id, selectdArr)) {
+                selectObj.append(
+                    $('<option/>').val(id).text(AllJson[id]).prop("selected", true)
+                )
+            } else {
+                selectObj.append(
+                    $('<option/>').val(id).text(AllJson[id])
+                )
+            }
+        }
+    }
 </script>

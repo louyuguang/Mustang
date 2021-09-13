@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 )
 
 type User struct {
@@ -80,20 +79,10 @@ func (*userModel) EnsureUser(m *User) (*User, error) {
 	err := Ormer().Read(oldUser, "username")
 	//
 	if err != nil {
-		if err == orm.ErrNoRows {
-			_, err := UserModel.AddUser(m)
-			if err != nil {
-				return nil, err
-			}
-			oldUser = m
-		} else {
-			return nil, err
-		}
+		return nil, err
 	} else {
-		//oldUser.Email = m.Email
-		_, err := Ormer().Update(oldUser)
-		if err != nil {
-			return nil, err
+		if !oldUser.Active {
+			return nil, errors.New("User is disable")
 		}
 	}
 	return oldUser, err
@@ -114,7 +103,7 @@ func (u *userModel) AddUser(m *User) (id int64, err error) {
 	return id, nil
 }
 
-func (u *userModel) UpdateUserById(m *User) (err error) {
+func (u *userModel) UpdateById(m *User) (err error) {
 	v := &User{Id: m.Id}
 	if err = Ormer().Read(v); err != nil {
 		return
@@ -126,10 +115,10 @@ func (u *userModel) UpdateUserById(m *User) (err error) {
 	v.Email = m.Email
 	v.Role = m.Role
 	v.Active = m.Active
-	if err := valid(m); err != nil {
+	if err := valid(v); err != nil {
 		return err
 	}
-	if m.Role.Id == 0 {
+	if v.Role.Id == 0 {
 		return errors.New("role id 不能为 0")
 	}
 	_, err = Ormer().Update(v)

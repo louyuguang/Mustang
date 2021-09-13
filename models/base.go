@@ -10,7 +10,6 @@ import (
 var (
 	once                   sync.Once
 	globalOrm              orm.Ormer
-	globalCond             *orm.Condition
 	UserModel              *userModel
 	RoleModel              *roleModel
 	ClusterModel           *clusterModel

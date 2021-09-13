@@ -5,8 +5,6 @@ import (
 	"Mustang/utils/k8s"
 	"Mustang/utils/logs"
 	"context"
-	"strconv"
-	"strings"
 
 	"github.com/RichardKnop/machinery/v1/tasks"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -18,13 +16,9 @@ func Deploy(id int64) error {
 	if err != nil {
 		return err
 	}
-	clusterIds := strings.Split(deploy.EnvClusterBinding.ClusterIds, ",")
-	for _, v := range clusterIds {
-		clusterId, _ := strconv.Atoi(v)
-		cluster, err := models.ClusterModel.GetById(int64(clusterId))
-		if err != nil {
-			return err
-		}
+	//clusterIds := strings.Split(deploy.EnvClusterBinding.ClusterIds, ",")
+	clusters := deploy.EnvClusterBinding.Clusters
+	for _, cluster := range clusters {
 		// get k8s clientSet and deploymentClient
 		clientSet, err := k8s.GetClientSetFromByte([]byte(cluster.KubeConfig))
 		deploymentClient := clientSet.AppsV1().Deployments(deploy.EnvClusterBinding.Namespace)
@@ -47,7 +41,7 @@ func Deploy(id int64) error {
 				return err
 			}
 		}
-		logs.Info("Env：%s ClusterId: %d deploy %s success.", deploy.EnvClusterBinding.EnvName, int64(clusterId), deploy.ProjectName)
+		logs.Info("Env：%s Cluster: %s deploy %s success.", deploy.EnvClusterBinding.EnvName, cluster.ClusterName, deploy.ProjectName)
 	}
 	return nil
 }

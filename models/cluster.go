@@ -1,11 +1,11 @@
 package models
 
 type Cluster struct {
-	Id          int64  `orm:"pk;auto" json:"id,omitempty"`
-	ClusterName string `valid:"Required" orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
-	AliasName   string `valid:"Required" orm:"size(255);column(aliasname)" json:"aliasname"`
-	KubeConfig  string `valid:"Required" orm:"null;type(text)" json:"kubeconfig,omitempty"`
-	EnvId       int64  `orm:"column(env_id);default(0)" json:"envId"`
+	Id                int64                `orm:"pk;auto" json:"id,omitempty"`
+	ClusterName       string               `valid:"Required" orm:"index;unique;size(200);column(clustername);" json:"clustername,omitempty"`
+	AliasName         string               `valid:"Required" orm:"size(255);column(aliasname)" json:"aliasname"`
+	KubeConfig        string               `valid:"Required" orm:"null;type(text)" json:"kubeconfig,omitempty"`
+	EnvClusterBinding []*EnvClusterBinding `orm:"reverse(many)" json:"envIds"`
 }
 
 type clusterModel struct{}
@@ -22,8 +22,8 @@ func (c *clusterModel) UpdateById(m *Cluster) (err error) {
 	if err := valid(m); err != nil {
 		return err
 	}
-	v := Cluster{Id: m.Id}
-	if err = Ormer().Read(&v, "Id"); err == nil {
+	v := &Cluster{Id: m.Id}
+	if err = Ormer().Read(v, "Id"); err == nil {
 		_, err = Ormer().Update(m)
 		return err
 	}
@@ -60,18 +60,17 @@ func (*clusterModel) GetClusters(pers int, offset int, scontent ...string) ([]*C
 		query["clustername__icontains"] = scontent
 	}
 	qs = BuildFilter(qs, query)
-	_, _ = qs.Limit(pers, offset).RelatedSel().All(&clusters)
+	_, _ = qs.Limit(pers, offset).All(&clusters)
 	return clusters, nil
 }
 
-func (*clusterModel) GetAllWithoutBinding() ([]*Cluster, error) {
-	var clusters []*Cluster
+func (*clusterModel) GetAll() (clusters []*Cluster, err error) {
 	qs := Ormer().QueryTable(new(Cluster))
-	_, err := qs.Filter("env_id", 0).All(&clusters)
+	_, err = qs.All(&clusters)
 	if err != nil {
-		return nil, err
+		return
 	}
-	return clusters, nil
+	return
 }
 
 func (*clusterModel) DeleteById(m *Cluster) error {

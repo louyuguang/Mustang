@@ -72,7 +72,7 @@ func (c *ClusterController) Update() {
 			}
 			c.Data["ClusterAdd"] = cluster
 		}
-		c.TplName = "clustercontroller/add.tpl"
+		c.TplName = "clustercontroller/add.html"
 		return
 	}
 	//POST

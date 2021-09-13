@@ -16,8 +16,8 @@ func (c *BaseController) URLMapping() {
 	c.Mapping("Index", c.Index)
 }
 
-
 func (c *BaseController) Prepare() {
+	c.TplExt = "html"
 	userId := c.GetSession("userId")
 	if userId == nil {
 		url := "/login"

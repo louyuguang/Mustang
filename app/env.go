@@ -6,4 +6,6 @@ import (
 )
 
 var Machinery *machinery.Server
+
+//var web beego.AddTemplateExt
 var Cfg = beego.AppConfig

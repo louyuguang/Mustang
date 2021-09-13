@@ -25,11 +25,9 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label">绑定集群<span class="text-red">*</span></label>
                 <div class="col-sm-8">
-                    <select id="clusterIds" name="clusterIds" data-placeholder="--请选择集群--" class="js-states form-control" multiple="multiple">
+                    <select id="clusterIds" name="clusterIds" data-placeholder="--请选择集群--"
+                            class="js-states form-control" multiple="multiple">
                         <option></option>
-                        {{range .Clusters}}
-                        <option value={{ .Id }}> {{ .ClusterName }} </option>
-                        {{end}}
                     </select>
                 </div>
             </div>
@@ -47,16 +45,19 @@
 {{define "self_footer_script"}}
 <script>
     $(function () {
-        $('#clusterIds').select2()
+        var clusterAll = {{.ClusterAll}}
+        var clusterSelect = {{.ClusterSelect}}
         $('#envAddBtn').on('click', function (e) {
             Net.post({
                 url: location.pathname,
                 data: $('#envForm').serialize(),
                 btn: $('#deployAddBtn'),
                 icon: $('#iconWait'),
-                go: getReferrer("{{urlfor "EnvClusterBindingController.List"}}")
+                go: getReferrer({{urlfor "EnvClusterBindingController.List"}})
+            });
         });
-        })
+        render_select_mulit($('#clusterIds'), clusterSelect, clusterAll)
+        $('#clusterIds').select2({placeholder: "--请选择--"})
     })
 </script>
 {{end}}

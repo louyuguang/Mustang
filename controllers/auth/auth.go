@@ -8,8 +8,9 @@ import (
 	"Mustang/utils/logs"
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego"
 	"net/http"
+
+	"github.com/astaxie/beego"
 )
 
 type AuthController struct {
@@ -36,6 +37,7 @@ type Result struct {
 
 // @router /login [get,post]
 func (c *AuthController) Login() {
+	c.TplExt = "html"
 	if c.Ctx.Input.Method() == "GET" {
 		return
 	}
@@ -46,10 +48,6 @@ func (c *AuthController) Login() {
 		c.Ctx.Output.Body(hack.Slice("Invalid param"))
 		return
 	}
-	//if userInfo.UserName == "" || userInfo.Password == "" {
-	//	c.Fail("username or password cannot be empty!")
-	//	return
-	//}
 	var authenticator Authenticator
 
 	authModel := models.AuthModel{
@@ -61,15 +59,17 @@ func (c *AuthController) Login() {
 	user, err := authenticator.Authenticate(authModel)
 	if err != nil {
 		logs.Warning(fmt.Sprintf("try to login in with usercontroller (%s) error %v ", authModel.UserName, err))
-		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Ctx.Output.Body(hack.Slice(fmt.Sprintf("Login failed. %v", err)))
+		c.Ctx.Output.SetStatus(http.StatusOK)
+		c.Data["json"] = map[string]interface{}{"status": -1, "msg": fmt.Sprintf("Login failed. %v", err)}
+		c.ServeJSON()
 		return
 	}
 
 	user, err = models.UserModel.EnsureUser(user)
 	if err != nil {
-		c.Ctx.Output.SetStatus(http.StatusForbidden)
-		c.Ctx.Output.Body(hack.Slice(err.Error()))
+		c.Ctx.Output.SetStatus(http.StatusOK)
+		c.Data["json"] = map[string]interface{}{"status": -1, "msg": err.Error()}
+		c.ServeJSON()
 		return
 	}
 	c.SetSession("userId", user.Id)

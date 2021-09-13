@@ -81,7 +81,7 @@ func (c *UserController) Update() {
 		c.Fail(err)
 		return
 	}
-	if err = models.UserModel.UpdateUserById(user); err != nil {
+	if err = models.UserModel.UpdateById(user); err != nil {
 		c.Fail(err)
 		return
 	}

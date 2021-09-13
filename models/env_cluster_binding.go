@@ -1,11 +1,13 @@
 package models
 
+import "Mustang/utils/logs"
+
 type EnvClusterBinding struct {
-	Id         int64     `orm:"pk;auto" json:"id,omitempty"`
-	ClusterIds string    `orm:"size(255);column(clusterids)" json:"clusterIds"`
-	Namespace  string    `valid:"Required" orm:"size(255);column(namespace)" json:"namespace"`
-	EnvName    string    `valid:"Required" orm:"size(255);column(envname)" json:"envName"`
-	Deploy     []*Deploy `orm:"reverse(many)" json:"env_id,omitempty"`
+	Id        int64      `orm:"pk;auto" json:"id,omitempty"`
+	Namespace string     `valid:"Required" orm:"size(255);column(namespace)" json:"namespace"`
+	EnvName   string     `valid:"Required" orm:"size(255);column(envname)" json:"envName"`
+	Deploy    []*Deploy  `orm:"reverse(many)" json:"deployIds"`
+	Clusters  []*Cluster `orm:"rel(m2m);rel_table(env_cluster)" json:"clusterIds" `
 }
 
 type envModel struct{}
@@ -15,6 +17,14 @@ func (*envModel) Add(m *EnvClusterBinding) (id int64, err error) {
 		return 0, err
 	}
 	id, err = Ormer().Insert(m)
+	m2m := Ormer().QueryM2M(m, "Clusters")
+	for _, cluster := range m.Clusters {
+		num, err := m2m.Add(cluster)
+		if err != nil {
+			return 0, err
+		}
+		logs.Info("env, cluster binding num: %d", num)
+	}
 	return
 }
 
@@ -22,10 +32,22 @@ func (c *envModel) UpdateById(m *EnvClusterBinding) (err error) {
 	if err := valid(m); err != nil {
 		return err
 	}
-	v := EnvClusterBinding{Id: m.Id}
-	if err = Ormer().Read(&v, "Id"); err == nil {
+	v := &EnvClusterBinding{Id: m.Id}
+	if err = Ormer().Read(v, "Id"); err == nil {
 		_, err = Ormer().Update(m)
-		return err
+		m2m := Ormer().QueryM2M(m, "Clusters")
+		num, err := m2m.Clear()
+		if err != nil {
+			return err
+		}
+		logs.Info("env, cluster binding delete num: %d", num)
+		for _, cluster := range m.Clusters {
+			num, err := m2m.Add(cluster)
+			if err != nil {
+				return err
+			}
+			logs.Info("env, cluster binding num: %d", num)
+		}
 	}
 	return
 }
@@ -33,9 +55,13 @@ func (c *envModel) UpdateById(m *EnvClusterBinding) (err error) {
 func (*envModel) GetById(id int64) (v *EnvClusterBinding, err error) {
 	v = &EnvClusterBinding{Id: id}
 	if err = Ormer().Read(v); err != nil {
-		return nil, err
+		return
 	}
-	return v, nil
+	_, err = Ormer().LoadRelated(v, "Clusters")
+	if err != nil {
+		return
+	}
+	return
 }
 
 func (*envModel) GetAllNum(scontent ...string) (num int64, err error) {
@@ -61,6 +87,10 @@ func (*envModel) GetEnvs(pers int, offset int, scontent ...string) ([]*EnvCluste
 	}
 	qs = BuildFilter(qs, query)
 	_, _ = qs.Limit(pers, offset).RelatedSel().All(&envs)
+	for i, env := range envs {
+		Ormer().LoadRelated(env, "Clusters")
+		envs[i] = env
+	}
 	return envs, nil
 }
 
